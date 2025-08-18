@@ -9,7 +9,7 @@ class GameConfig {
     const urlParams = new URLSearchParams(window.location.search);
     return {
       city: urlParams.get("city") || "lisboa",
-      gridSize: urlParams.get("gridSize") || "1000",
+      gridSize: urlParams.get("gridSize") || "500",
       mode: urlParams.get("mode") || "listings_count",
       value: parseFloat(urlParams.get("value")) || 3,
     };

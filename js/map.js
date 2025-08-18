@@ -164,8 +164,6 @@ class GameMap {
       [props.top, props.right],
     ];
 
-    console.log("Creating rectangle for cell:", cellId, bounds);
-
     // Create rectangle
     const rectangle = L.rectangle(bounds, {
       pane: "gameCells",
@@ -194,7 +192,6 @@ class GameMap {
       this.handleDirectCellRightClick(cellId, e);
     });
 
-    console.log("Created rectangle for cell:", cellId);
     return rectangle;
   }
 
