@@ -64,9 +64,9 @@ class GameConfig {
   getModeDisplayName() {
     switch (this.params.mode) {
       case "listings_count":
-        return "Listings Count";
+        return "Contagem de Anúncios";
       case "price_mean":
-        return "Average Price (€)";
+        return "Preço Médio (€)";
       default:
         return this.params.mode;
     }

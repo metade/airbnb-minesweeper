@@ -319,19 +319,21 @@ class GameMap {
     let tooltipContent = "";
     if (cell.isRevealed) {
       if (cell.isMine) {
-        tooltipContent = "💣 Mine!";
+        tooltipContent = "💣 Mina!";
       } else if (cell.adjacentMines > 0) {
-        tooltipContent = `${cell.adjacentMines} adjacent mines`;
+        tooltipContent = `${cell.adjacentMines} minas adjacentes`;
       } else {
-        tooltipContent = "Safe";
+        tooltipContent = "Seguro";
       }
 
       const config = window.gameConfig;
       const mode = config.getMode();
       const value = cell.value;
-      tooltipContent += `<br/>${config.getModeDisplayName()}: ${value}`;
+      const modeDisplayName =
+        mode === "listings_count" ? "Contagem de Anúncios" : "Preço Médio (€)";
+      tooltipContent += `<br/>${modeDisplayName}: ${value}`;
     } else if (cell.isFlagged) {
-      tooltipContent = "🚩 Flagged";
+      tooltipContent = "🚩 Marcado";
     }
 
     if (tooltipContent) {

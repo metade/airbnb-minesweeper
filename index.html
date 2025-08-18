@@ -1,149 +1,240 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Airbnb Minesweeper</title>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Minesweeper Airbnb</title>
+        <style>
+            :root {
+                --brand-green: #00cd8c;
+                --brand-light-red: #f8402f;
+                --brand-dark-red: #d61527;
+                --brand-black: #000000;
+                --brand-font:
+                    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+                    sans-serif;
+            }
 
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+            body {
+                font-family: var(--brand-font);
+                background: #ffffff;
+                color: var(--brand-black);
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
 
-        body {
-            font-family: Arial, sans-serif;
-            background: #f0f0f0;
-            overflow: hidden;
-            height: 100vh;
-            width: 100vw;
-        }
+            header {
+                background: var(--brand-green);
+                color: white;
+                padding: 1.5rem 1rem;
+                text-align: center;
+                box-shadow: 0 3px 6px rgba(0, 205, 140, 0.2);
+                z-index: 100;
+            }
 
-        #game-container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-        }
+            h1 {
+                font-size: 1.75rem;
+                font-weight: 400;
+                margin-bottom: 0.5rem;
+                letter-spacing: 0.02em;
+            }
 
-        #map-container {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            overflow: hidden;
-        }
+            .subtitle {
+                font-size: 0.95rem;
+                opacity: 0.9;
+                font-weight: 400;
+                letter-spacing: 0.01em;
+            }
 
-        #map {
-            width: 100%;
-            height: 100%;
-        }
+            .game-container {
+                flex: 1;
+                position: relative;
+                overflow: hidden;
+            }
 
-        .game-cell {
-            cursor: pointer;
-            border: 2px solid #666;
-            background: #ccc;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 12px;
-            transition: all 0.2s ease;
-            user-select: none;
-        }
+            #game-frame {
+                width: 100%;
+                height: 100%;
+                border: none;
+                display: block;
+            }
 
-        .game-cell:hover {
-            border-color: #333;
-        }
+            footer {
+                background: var(--brand-black);
+                color: white;
+                padding: 1rem;
+                text-align: center;
+                font-size: 0.85rem;
+                border-top: 2px solid var(--brand-green);
+            }
 
-        .cell-hidden {
-            background: #ccc;
-            color: transparent;
-        }
+            .footer-links {
+                margin-top: 0.5rem;
+            }
 
-        .cell-revealed {
-            background: #fff;
-            border-color: #999;
-        }
+            .footer-links a {
+                color: var(--brand-green);
+                text-decoration: none;
+                margin: 0 0.75rem;
+                font-weight: 500;
+                transition: color 0.2s ease;
+            }
 
-        .cell-flagged {
-            background: #ff6b6b;
-            color: white;
-        }
+            .footer-links a:hover {
+                color: var(--brand-light-red);
+                text-decoration: underline;
+            }
 
-        .cell-flagged::before {
-            content: "🚩";
-            font-size: 10px;
-        }
+            @media (max-width: 768px) {
+                h1 {
+                    font-size: 1.5rem;
+                }
 
-        .cell-mine {
-            background: #ff4444 !important;
-            color: white;
-        }
+                .subtitle {
+                    font-size: 0.85rem;
+                }
 
-        .cell-mine::before {
-            content: "💣";
-            font-size: 10px;
-        }
+                header {
+                    padding: 1rem 0.75rem;
+                }
 
-        .cell-number-1 { color: #0000ff; }
-        .cell-number-2 { color: #008000; }
-        .cell-number-3 { color: #ff0000; }
-        .cell-number-4 { color: #000080; }
-        .cell-number-5 { color: #800000; }
-        .cell-number-6 { color: #008080; }
-        .cell-number-7 { color: #000000; }
-        .cell-number-8 { color: #808080; }
+                footer {
+                    padding: 0.75rem;
+                    font-size: 0.8rem;
+                }
 
-        #error-message {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #f44336;
-            color: white;
-            padding: 20px;
-            border-radius: 5px;
-            z-index: 2000;
-            max-width: 80%;
-            text-align: center;
-        }
+                .footer-links {
+                    margin-top: 0.4rem;
+                }
 
-        #loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 20px;
-            border-radius: 5px;
-            z-index: 2000;
-        }
+                .footer-links a {
+                    margin: 0 0.5rem;
+                    font-size: 0.8rem;
+                }
+            }
 
-        .hidden { display: none !important; }
-    </style>
-</head>
-<body>
-    <div id="game-container">
-        <div id="map-container">
-            <div id="map"></div>
+            /* Loading state */
+            .loading {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 100%;
+                font-size: 1.1rem;
+                color: var(--brand-green);
+                font-weight: 500;
+            }
+
+            .loading::before {
+                content: "⏳";
+                margin-right: 0.5rem;
+                animation: spin 2s linear infinite;
+            }
+
+            @keyframes spin {
+                from {
+                    transform: rotate(0deg);
+                }
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <h1>Minesweeper Airbnb</h1>
+            <div class="subtitle">
+                Descubra padrões ocultos nos dados de aluguel
+            </div>
+        </header>
+
+        <div class="game-container">
+            <div class="loading" id="loading">Carregando jogo...</div>
+            <iframe id="game-frame" src="" style="display: none"></iframe>
         </div>
-    </div>
-</body>
 
-    <div id="loading">Loading game data...</div>
-    <div id="error-message" class="hidden"></div>
+        <footer>
+            <div class="footer-links">
+                <a href="#" onclick="showInstructions()">Como Jogar</a>
+                <a href="#" onclick="newGame()">Novo Jogo</a>
+            </div>
+        </footer>
 
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script>
+            // Parse URL parameters and pass them to the game
+            function getUrlParams() {
+                const params = new URLSearchParams(window.location.search);
+                return {
+                    city: params.get("city") || "lisboa",
+                    gridSize: params.get("gridSize") || "1000",
+                    mode: params.get("mode") || "listings_count",
+                    value: params.get("value") || "3",
+                };
+            }
 
-    <!-- Game Scripts -->
-    <script src="js/config.js"></script>
-    <script src="js/game.js"></script>
-    <script src="js/map.js"></script>
-    <script src="js/main.js"></script>
-</body>
+            // Update display info (removed UI but keeping for potential future use)
+            function updateDisplay(params) {
+                // Configuration is now hidden from user but still functional for testing
+            }
+
+            // Load the game in iframe
+            function loadGame() {
+                const params = getUrlParams();
+                updateDisplay(params);
+
+                const gameUrl = `game.html?${new URLSearchParams(params).toString()}`;
+                const iframe = document.getElementById("game-frame");
+
+                iframe.onload = function () {
+                    document.getElementById("loading").style.display = "none";
+                    iframe.style.display = "block";
+                };
+
+                iframe.src = gameUrl;
+            }
+
+            // Show instructions
+            function showInstructions() {
+                alert(`Como Jogar o Minesweeper Airbnb:
+
+🎯 Objetivo: Encontre todas as áreas seguras sem atingir uma "mina"
+
+🔍 Minas são células onde o valor da propriedade é >= ao seu limite
+- Clique esquerdo para revelar uma célula
+- Clique direito para marcar minas suspeitas
+- Números mostram quantas minas estão adjacentes
+
+💡 Dicas:
+- Use os números para deduzir áreas seguras
+- Marque minas suspeitas para evitar erros
+- Cada cidade tem padrões diferentes para descobrir!`);
+            }
+
+            // Start new game
+            function newGame() {
+                // Restart with current URL parameters (or defaults if none)
+                const params = getUrlParams();
+                const newUrl = `?city=${params.city}&gridSize=${params.gridSize}&mode=${params.mode}&value=${params.value}`;
+                window.location.search = newUrl;
+            }
+
+            // Initialize when page loads
+            document.addEventListener("DOMContentLoaded", loadGame);
+
+            // Handle iframe communication (optional - for future features)
+            window.addEventListener("message", function (event) {
+                if (event.data.type === "gameOver") {
+                    // Could show game over message in header
+                    console.log("Game finished:", event.data);
+                }
+            });
+        </script>
+    </body>
 </html>
