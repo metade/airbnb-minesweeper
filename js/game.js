@@ -9,6 +9,7 @@ class MinesweeperGame {
     this.startTime = null;
     this.timer = null;
     this.timerInterval = null;
+    this.clickedMine = null; // Track which mine was clicked to trigger game over
 
     this.boundCellClick = this.handleCellClick.bind(this);
     this.boundCellRightClick = this.handleCellRightClick.bind(this);
@@ -34,6 +35,7 @@ class MinesweeperGame {
     this.revealedCount = 0;
     this.startTime = null;
     this.timer = 0;
+    this.clickedMine = null;
     this.stopTimer();
   }
 
@@ -174,6 +176,7 @@ class MinesweeperGame {
 
     if (cell.isMine) {
       console.log("Hit a mine! Game over.");
+      this.clickedMine = cell; // Track which mine was clicked
       this.gameOver(false);
     } else {
       if (cell.adjacentMines === 0) {

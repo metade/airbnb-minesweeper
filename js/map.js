@@ -249,12 +249,15 @@ class GameMap {
       if (cell.isMine) {
         fillColor = "#ff4444";
         color = "#cc3333";
-        // Add mine marker
+        // Add mine marker - different emoji for clicked mine vs other mines
         const bounds = overlay.getBounds();
         const center = bounds.getCenter();
+        const isClickedMine = window.minesweeperGame.clickedMine === cell;
+        const mineEmoji = isClickedMine ? "💥" : "💣";
+
         cell.numberMarker = L.marker(center, {
           icon: L.divIcon({
-            html: "💣",
+            html: mineEmoji,
             className: "cell-number-marker",
             iconSize: [20, 20],
             iconAnchor: [10, 10],
