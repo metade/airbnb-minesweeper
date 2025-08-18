@@ -117,10 +117,31 @@ class GameMap {
     this.map.getPane("gameCells").style.zIndex = 1000;
     this.map.getPane("gameCells").style.pointerEvents = "auto";
 
-    // Create tooltip pane with higher z-index
+    // Create panes with proper z-index layering
+    this.map.createPane("numberMarkers");
+    this.map.getPane("numberMarkers").style.zIndex = 1500;
+    this.map.getPane("numberMarkers").style.pointerEvents = "none";
+
     this.map.createPane("tooltips");
     this.map.getPane("tooltips").style.zIndex = 2000;
     this.map.getPane("tooltips").style.pointerEvents = "none";
+
+    // Add CSS for number markers
+    if (!document.getElementById("cell-marker-styles")) {
+      const style = document.createElement("style");
+      style.id = "cell-marker-styles";
+      style.textContent = `
+        .cell-number-marker {
+          background: none !important;
+          border: none !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          pointer-events: none !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
 
     // Create rectangles directly from GeoJSON data
     this.geojsonData.features.forEach((feature) => {
@@ -210,6 +231,12 @@ class GameMap {
     let color = "#666";
     let fillOpacity = 1;
 
+    // Remove existing number marker if any
+    if (cell.numberMarker) {
+      this.map.removeLayer(cell.numberMarker);
+      cell.numberMarker = null;
+    }
+
     if (cell.isFlagged) {
       fillColor = "#ff6b6b";
       color = "#cc5555";
@@ -217,6 +244,18 @@ class GameMap {
       if (cell.isMine) {
         fillColor = "#ff4444";
         color = "#cc3333";
+        // Add mine marker
+        const bounds = overlay.getBounds();
+        const center = bounds.getCenter();
+        cell.numberMarker = L.marker(center, {
+          icon: L.divIcon({
+            html: "💣",
+            className: "cell-number-marker",
+            iconSize: [20, 20],
+            iconAnchor: [10, 10],
+          }),
+          pane: "numberMarkers",
+        }).addTo(this.map);
       } else {
         fillColor = "#fff";
         color = "#999";
@@ -233,6 +272,29 @@ class GameMap {
             8: "#f5f5f5",
           };
           fillColor = colors[cell.adjacentMines] || "#fff";
+
+          // Add number marker
+          const bounds = overlay.getBounds();
+          const center = bounds.getCenter();
+          const numberColors = {
+            1: "#0000ff",
+            2: "#008000",
+            3: "#ff0000",
+            4: "#000080",
+            5: "#800000",
+            6: "#008080",
+            7: "#000000",
+            8: "#808080",
+          };
+          cell.numberMarker = L.marker(center, {
+            icon: L.divIcon({
+              html: `<span style="color: ${numberColors[cell.adjacentMines] || "#000"}; font-weight: bold; font-size: 14px;">${cell.adjacentMines}</span>`,
+              className: "cell-number-marker",
+              iconSize: [20, 20],
+              iconAnchor: [10, 10],
+            }),
+            pane: "numberMarkers",
+          }).addTo(this.map);
         }
       }
     }
@@ -260,16 +322,18 @@ class GameMap {
       tooltipContent += `<br/>${config.getModeDisplayName()}: ${value}`;
     } else if (cell.isFlagged) {
       tooltipContent = "🚩 Flagged";
-    } else {
-      tooltipContent = "Hidden cell - Click to reveal";
     }
 
-    overlay.bindTooltip(tooltipContent, {
-      permanent: false,
-      direction: "center",
-      className: "cell-tooltip",
-      pane: "tooltips",
-    });
+    if (tooltipContent) {
+      overlay.bindTooltip(tooltipContent, {
+        permanent: false,
+        direction: "center",
+        className: "cell-tooltip",
+        pane: "tooltips",
+      });
+    } else {
+      overlay.unbindTooltip();
+    }
   }
 
   showError(message) {
