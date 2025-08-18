@@ -267,6 +267,7 @@ class GameMap {
       } else {
         fillColor = "#fff";
         color = "#999";
+        fillOpacity = 0.2; // Make safe cells transparent to show map underneath
         if (cell.adjacentMines > 0) {
           // Color based on number of adjacent mines
           const colors = {
@@ -280,6 +281,7 @@ class GameMap {
             8: "#f5f5f5",
           };
           fillColor = colors[cell.adjacentMines] || "#fff";
+          fillOpacity = 0.8; // More visible for numbered cells
 
           // Add number marker
           const bounds = overlay.getBounds();
