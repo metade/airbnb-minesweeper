@@ -27,10 +27,15 @@ class GameMap {
         tap: false,
       });
 
-      // Add tile layer (background map)
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "© OpenStreetMap contributors",
-      }).addTo(this.map);
+      // Add Stamen Toner tile layer (background map)
+      L.tileLayer(
+        "https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}.png",
+        {
+          attribution:
+            "© Stadia Maps © Stamen Design © OpenStreetMap contributors",
+          maxZoom: 18,
+        },
+      ).addTo(this.map);
 
       // Fit map to data bounds with padding
       this.map.fitBounds(bounds, { padding: [20, 20] });
