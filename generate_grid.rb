@@ -237,7 +237,7 @@ class GridGenerator
           'price_min' => price_min.round(2),
           'price_max' => price_max.round(2),
           'price_mean' => price_mean.round(2),
-          'NUMPOINTS' => num_points.to_f
+          'listings_count' => num_points.to_f
         }
 
         # Convert polygon to coordinate array for GeoJSON (already in WGS84)
@@ -300,7 +300,7 @@ class GridGenerator
     # Print statistics
     if features.any?
       all_prices = features.map { |f| f['properties']['price_mean'] }
-      all_counts = features.map { |f| f['properties']['NUMPOINTS'] }
+      all_counts = features.map { |f| f['properties']['listings_count'] }
 
       puts "\nStatistics:"
       puts "Price range: €#{all_prices.min} - €#{all_prices.max}"
