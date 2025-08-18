@@ -37,8 +37,8 @@ class GameMap {
         },
       ).addTo(this.map);
 
-      // Fit map to data bounds with padding
-      this.map.fitBounds(bounds, { padding: [20, 20] });
+      // Fit map to data bounds with tighter padding for mobile
+      this.map.fitBounds(bounds, { padding: [1, 1] });
 
       // Create game cells from GeoJSON
       this.createGameCells();
