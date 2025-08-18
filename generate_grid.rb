@@ -5,9 +5,10 @@ require 'csv'
 require 'rgeo'
 
 class GridGenerator
-  def initialize(outline_file, airbnb_file, cell_size = 200.0)
-    @outline_file = outline_file
-    @airbnb_file = airbnb_file
+  def initialize(city, cell_size = 200.0)
+    @city = city
+    @outline_file = "data/src/#{city}/outline.geojson"
+    @airbnb_file = "data/src/#{city}/listings.csv"
     @cell_size = cell_size.to_f
 
     # Use Cartesian factory for spatial operations but keep WGS84 coordinates
@@ -29,8 +30,8 @@ class GridGenerator
     meters / @meters_per_degree_lon
   end
 
-  def load_lisbon_outline
-    puts "Loading Lisbon outline..."
+  def load_city_outline
+    puts "Loading #{@city} outline..."
 
     begin
       file_content = File.read(@outline_file)
@@ -67,10 +68,10 @@ class GridGenerator
       # Create polygon
       outline_polygon = @factory.polygon(@factory.linear_ring(points))
 
-      puts "Loaded Lisbon outline"
+      puts "Loaded #{@city} outline"
       outline_polygon
     rescue => e
-      puts "Error loading Lisbon outline: #{e.message}"
+      puts "Error loading #{@city} outline: #{e.message}"
       puts e.backtrace.first(5)
       exit 1
     end
@@ -167,7 +168,7 @@ class GridGenerator
 
         cell_polygon = @factory.polygon(@factory.linear_ring(points))
 
-        # Check if cell intersects with Lisbon outline
+        # Check if cell intersects with city outline
         if outline_geometry.intersects?(cell_polygon)
           grid_cells << {
             id: cell_id,
@@ -185,7 +186,7 @@ class GridGenerator
       end
     end
 
-    puts "Created #{grid_cells.length} grid cells that intersect with Lisbon"
+    puts "Created #{grid_cells.length} grid cells that intersect with #{@city}"
     grid_cells
   end
 
@@ -266,7 +267,7 @@ class GridGenerator
 
   def generate
     # Load data
-    outline = load_lisbon_outline
+    outline = load_city_outline
     airbnb_listings = load_airbnb_data
 
     # Create grid
@@ -278,7 +279,7 @@ class GridGenerator
     # Create GeoJSON output
     geojson_output = {
       'type' => 'FeatureCollection',
-      'name' => "LISBON_grid#{@cell_size.to_i}_price",
+      'name' => "#{@city}_#{@cell_size.to_i}",
       'crs' => {
         'type' => 'name',
         'properties' => {
@@ -289,7 +290,7 @@ class GridGenerator
     }
 
     # Save to file
-    output_file = "LISBON_grid#{@cell_size.to_i}_price.geojson"
+    output_file = "data/#{@city}_#{@cell_size.to_i}.geojson"
     puts "Saving to #{output_file}..."
 
     File.write(output_file, JSON.pretty_generate(geojson_output))
@@ -311,42 +312,44 @@ class GridGenerator
 end
 
 def print_usage
-  puts "Usage: ruby generate_lisbon_grid.rb [cell_size_in_meters]"
+  puts "Usage: ruby generate_grid.rb <city_name> [cell_size_in_meters]"
   puts "Examples:"
-  puts "  ruby generate_lisbon_grid.rb           # Uses default 200m cells"
-  puts "  ruby generate_lisbon_grid.rb 100       # Uses 100m cells"
-  puts "  ruby generate_lisbon_grid.rb 500       # Uses 500m cells"
+  puts "  ruby generate_grid.rb lisboa           # Uses default 200m cells for Lisboa"
+  puts "  ruby generate_grid.rb lisboa 100       # Uses 100m cells for Lisboa"
+  puts "  ruby generate_grid.rb porto 500        # Uses 500m cells for Porto"
   puts ""
-  puts "Requires: lisbon.geojson and listings_Lis.csv in current directory"
+  puts "Requires: data/src/<city>/outline.geojson and data/src/<city>/listings.csv"
 end
 
 # Main execution
 if __FILE__ == $0
   # Parse command line arguments
-  if ARGV.include?('-h') || ARGV.include?('--help')
+  if ARGV.include?('-h') || ARGV.include?('--help') || ARGV.length < 1
     print_usage
     exit 0
   end
 
+  city = ARGV[0]
   cell_size = 200.0  # default
-  if ARGV.length > 0
+
+  if ARGV.length > 1
     begin
-      cell_size = ARGV[0].to_f
+      cell_size = ARGV[1].to_f
       if cell_size <= 0
         puts "Error: Cell size must be a positive number"
         print_usage
         exit 1
       end
     rescue
-      puts "Error: Invalid cell size '#{ARGV[0]}'"
+      puts "Error: Invalid cell size '#{ARGV[1]}'"
       print_usage
       exit 1
     end
   end
 
   # Check if files exist
-  outline_file = 'lisbon.geojson'
-  airbnb_file = 'listings_Lis.csv'
+  outline_file = "data/src/#{city}/outline.geojson"
+  airbnb_file = "data/src/#{city}/listings.csv"
 
   unless File.exist?(outline_file)
     puts "Error: #{outline_file} not found!"
@@ -358,10 +361,11 @@ if __FILE__ == $0
     exit 1
   end
 
+  puts "Using city: #{city}"
   puts "Using cell size: #{cell_size.to_i}m x #{cell_size.to_i}m"
   puts ""
 
   # Generate the grid
-  generator = GridGenerator.new(outline_file, airbnb_file, cell_size)
+  generator = GridGenerator.new(city, cell_size)
   generator.generate
 end
