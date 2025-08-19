@@ -153,6 +153,120 @@
                     transform: rotate(360deg);
                 }
             }
+
+            /* Modal styles */
+            .modal {
+                display: none;
+                position: fixed;
+                z-index: 1000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                overflow: auto;
+                background-color: rgba(0, 0, 0, 0.4);
+            }
+
+            .modal-content {
+                background-color: #fefefe;
+                margin: 5% auto;
+                padding: 0;
+                border: none;
+                border-radius: 8px;
+                width: 90%;
+                max-width: 600px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+                animation: modalSlideIn 0.3s ease-out;
+            }
+
+            @keyframes modalSlideIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(-50px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .modal-header {
+                background: var(--brand-green);
+                color: white;
+                padding: 1.5rem;
+                font-size: 1.4rem;
+                font-weight: 500;
+                border-radius: 8px 8px 0 0;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .modal-body {
+                padding: 1.5rem;
+                line-height: 1.6;
+                color: var(--brand-black);
+            }
+
+            .modal-body strong {
+                color: var(--brand-green);
+                font-weight: 600;
+            }
+
+            .modal-body p {
+                margin-bottom: 0.5rem;
+            }
+
+            .modal-body ul {
+                margin: 0.5rem 0 1rem 1.5rem;
+            }
+
+            .modal-body li {
+                margin-bottom: 0.3rem;
+            }
+
+            .config-section {
+                background: #f8f9fa;
+                padding: 1rem;
+                border-radius: 6px;
+                margin: 1rem 0;
+                border-left: 4px solid var(--brand-green);
+            }
+
+            .close {
+                color: white;
+                font-size: 28px;
+                font-weight: bold;
+                cursor: pointer;
+                opacity: 0.8;
+                transition: opacity 0.2s;
+                line-height: 1;
+            }
+
+            .close:hover,
+            .close:focus {
+                opacity: 1;
+            }
+
+            @media (max-width: 768px) {
+                .modal-content {
+                    margin: 10% auto;
+                    width: 95%;
+                }
+
+                .modal-header {
+                    font-size: 1.2rem;
+                    padding: 1rem;
+                }
+
+                .modal-body {
+                    padding: 1rem;
+                }
+
+                .close {
+                    font-size: 24px;
+                }
+            }
         </style>
     </head>
     <body>
@@ -217,23 +331,6 @@
                 iframe.src = gameUrl;
             }
 
-            // Show instructions
-            function showInstructions() {
-                alert(`Como Jogar o Airbnb Minesweeper:
-
-🎯 Objetivo: Encontre todas as áreas seguras sem atingir uma "mina"
-
-🔍 Minas são células onde o valor da propriedade é >= ao seu limite
-- Clique esquerdo para revelar uma célula
-- Clique direito para marcar minas suspeitas
-- Números mostram quantas minas estão adjacentes
-
-💡 Dicas:
-- Use os números para deduzir áreas seguras
-- Marque minas suspeitas para evitar erros
-- Cada cidade tem padrões diferentes para descobrir!`);
-            }
-
             // Start new game
             function newGame() {
                 // Restart with current URL parameters (or defaults if none)
@@ -252,6 +349,80 @@
                     console.log("Game finished:", event.data);
                 }
             });
+        </script>
+
+        <!-- Instructions Modal -->
+        <div id="instructionsModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span>Como Jogar o Airbnb Minesweeper</span>
+                    <span class="close" onclick="closeInstructions()"
+                        >&times;</span
+                    >
+                </div>
+                <div class="modal-body" id="modalBody">
+                    <!-- Content will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Show instructions modal
+            function showInstructions() {
+                // Parse URL parameters directly
+                const params = getUrlParams();
+                const city =
+                    params.city.charAt(0).toUpperCase() + params.city.slice(1);
+                const gridSize = params.gridSize;
+                const mode =
+                    params.mode === "listings_count"
+                        ? "Contagem de Anúncios"
+                        : "Preço Médio (€)";
+                const value = params.value;
+                const unit = params.mode === "price_mean" ? "€" : " anúncios";
+
+                const objective =
+                    params.mode === "listings_count"
+                        ? `Encontre todas as áreas seguras em <strong>${city}</strong> sem atingir uma "mina", ou seja às áreas de <strong>${gridSize}m</strong> que tenha mais de <strong>${value} Airbnbs</strong>.`
+                        : `Encontre todas as áreas seguras em <strong>${city}</strong> sem atingir uma "mina", ou seja às áreas de <strong>${gridSize}m</strong> que tenham Airbnb que em média custe mais de <strong>€${value}</strong> por noite.`;
+
+                const instructions = `
+                        <h4>🎯 Objetivo:</h4>
+                        <p>${objective}</p>
+
+                        <h4> 🔍 Como Jogar:</h4>
+                        <ul>
+                            <li>Clique esquerdo para revelar uma célula</li>
+                            <li>Clique direito para marcar minas suspeitas</li>
+                            <li>Números mostram quantas minas estão adjacentes</li>
+                        </ul>
+
+                        <h4>💡 Dicas:</h4>
+                        <ul>
+                            <li>Use os números para deduzir áreas seguras</li>
+                            <li>Marque minas suspeitas para evitar erros</li>
+                            <li>Cada cidade tem padrões diferentes para descobrir!</li>
+                        </ul>
+                    `;
+
+                document.getElementById("modalBody").innerHTML = instructions;
+                document.getElementById("instructionsModal").style.display =
+                    "block";
+            }
+
+            // Close instructions modal
+            function closeInstructions() {
+                document.getElementById("instructionsModal").style.display =
+                    "none";
+            }
+
+            // Close modal when clicking outside of it
+            window.onclick = function (event) {
+                const modal = document.getElementById("instructionsModal");
+                if (event.target === modal) {
+                    modal.style.display = "none";
+                }
+            };
         </script>
     </body>
 </html>
