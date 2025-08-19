@@ -6,9 +6,7 @@ class MinesweeperGame {
     this.mineCount = 0;
     this.flagCount = 0;
     this.revealedCount = 0;
-    this.startTime = null;
-    this.timer = null;
-    this.timerInterval = null;
+
     this.clickedMine = null; // Track which mine was clicked to trigger game over
 
     this.boundCellClick = this.handleCellClick.bind(this);
@@ -33,10 +31,7 @@ class MinesweeperGame {
     this.mineCount = 0;
     this.flagCount = 0;
     this.revealedCount = 0;
-    this.startTime = null;
-    this.timer = 0;
     this.clickedMine = null;
-    this.stopTimer();
   }
 
   processGeoJSONData(geojsonData) {
@@ -208,8 +203,6 @@ class MinesweeperGame {
 
   startGame() {
     this.gameState = "playing";
-    this.startTime = Date.now();
-    this.startTimer();
   }
 
   revealCell(cell) {
@@ -286,7 +279,6 @@ class MinesweeperGame {
 
   gameOver(won) {
     this.gameState = won ? "won" : "lost";
-    this.stopTimer();
 
     if (!won) {
       // Reveal all mines
@@ -301,38 +293,11 @@ class MinesweeperGame {
     this.updateUI();
   }
 
-  startTimer() {
-    this.timerInterval = setInterval(() => {
-      this.timer = Math.floor((Date.now() - this.startTime) / 1000);
-      this.updateTimerDisplay();
-    }, 1000);
-  }
-
-  stopTimer() {
-    if (this.timerInterval) {
-      clearInterval(this.timerInterval);
-      this.timerInterval = null;
-    }
-  }
-
-  updateTimerDisplay() {
-    const minutes = Math.floor(this.timer / 60);
-    const seconds = this.timer % 60;
-    const display = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
-    // Timer display removed for minimal UI
-    console.log(`Game Time: ${display}`);
-  }
-
   updateUI() {
     // Update game status in console for debugging
     console.log(
       `Game State: ${this.gameState}, Mines: ${this.mineCount}, Flags: ${this.flagCount}, Revealed: ${this.revealedCount}`,
     );
-
-    // Update timer if playing
-    if (this.gameState === "playing") {
-      this.updateTimerDisplay();
-    }
   }
 
   getCells() {
