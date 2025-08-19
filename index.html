@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Minesweeper Airbnb</title>
+        <title>Airbnb Minesweeper</title>
         <style>
             :root {
                 --brand-green: #00cd8c;
@@ -66,6 +66,27 @@
                 display: block;
             }
 
+            .nav-links {
+                background: var(--brand-black);
+                color: white;
+                padding: 0.75rem 1rem;
+                text-align: center;
+                border-bottom: 2px solid var(--brand-green);
+            }
+
+            .nav-links a {
+                color: var(--brand-green);
+                text-decoration: none;
+                margin: 0 0.75rem;
+                font-weight: 500;
+                transition: color 0.2s ease;
+            }
+
+            .nav-links a:hover {
+                color: var(--brand-light-red);
+                text-decoration: underline;
+            }
+
             footer {
                 background: var(--brand-black);
                 color: white;
@@ -75,21 +96,8 @@
                 border-top: 2px solid var(--brand-green);
             }
 
-            .footer-links {
-                margin-top: 0.5rem;
-            }
-
-            .footer-links a {
+            footer a {
                 color: var(--brand-green);
-                text-decoration: none;
-                margin: 0 0.75rem;
-                font-weight: 500;
-                transition: color 0.2s ease;
-            }
-
-            .footer-links a:hover {
-                color: var(--brand-light-red);
-                text-decoration: underline;
             }
 
             @media (max-width: 768px) {
@@ -105,17 +113,17 @@
                     padding: 1rem 0.75rem;
                 }
 
-                footer {
-                    padding: 0.75rem;
+                .nav-links {
+                    padding: 0.6rem 0.75rem;
+                }
+
+                .nav-links a {
+                    margin: 0 0.5rem;
                     font-size: 0.8rem;
                 }
 
-                .footer-links {
-                    margin-top: 0.4rem;
-                }
-
-                .footer-links a {
-                    margin: 0 0.5rem;
+                footer {
+                    padding: 0.75rem;
                     font-size: 0.8rem;
                 }
             }
@@ -149,11 +157,16 @@
     </head>
     <body>
         <header>
-            <h1>Minesweeper Airbnb</h1>
-            <div class="subtitle">
-                Descubra padrões ocultos nos dados de aluguel
-            </div>
+            <h1>Airbnb Minesweeper</h1>
+            <!-- <div class="subtitle">
+                Descubra padrões ocultos nos dados de aluguer
+            </div> -->
         </header>
+
+        <nav class="nav-links">
+            <a href="#" onclick="showInstructions()">Como Jogar</a>
+            <a href="#" onclick="newGame()">Novo Jogo</a>
+        </nav>
 
         <div class="game-container">
             <div class="loading" id="loading">Carregando jogo...</div>
@@ -161,10 +174,14 @@
         </div>
 
         <footer>
-            <div class="footer-links">
-                <a href="#" onclick="showInstructions()">Como Jogar</a>
-                <a href="#" onclick="newGame()">Novo Jogo</a>
-            </div>
+            <small>
+                Por <a href="https://www.metade.org">metade.org</a>
+                inspirado por
+                <a
+                    href="https://playabledatalab.github.io/004_tourist-minesweeper/"
+                    >playabledatalab</a
+                >
+            </small>
         </footer>
 
         <script>
@@ -202,7 +219,7 @@
 
             // Show instructions
             function showInstructions() {
-                alert(`Como Jogar o Minesweeper Airbnb:
+                alert(`Como Jogar o Airbnb Minesweeper:
 
 🎯 Objetivo: Encontre todas as áreas seguras sem atingir uma "mina"
 
