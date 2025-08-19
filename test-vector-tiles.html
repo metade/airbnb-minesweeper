@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Vector Tiles Test</title>
+
+        <!-- Leaflet CSS -->
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        />
+
+        <!-- MapLibre GL JS CSS -->
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/maplibre-gl@4.0.2/dist/maplibre-gl.css"
+        />
+
+        <style>
+            body {
+                margin: 0;
+                padding: 20px;
+                font-family: Arial, sans-serif;
+            }
+
+            #map {
+                width: 100%;
+                height: 500px;
+                border: 1px solid #ccc;
+            }
+
+            .info {
+                margin-bottom: 20px;
+                padding: 10px;
+                background: #f0f0f0;
+                border-radius: 5px;
+            }
+
+            .error {
+                background: #ffebee;
+                color: #c62828;
+            }
+
+            .success {
+                background: #e8f5e8;
+                color: #2e7d32;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Vector Tiles Test</h1>
+
+        <div id="status" class="info">Loading vector tiles...</div>
+
+        <div id="map"></div>
+
+        <div class="info">
+            <h3>Test Instructions:</h3>
+            <ul>
+                <li>The map should load with vector tiles from Stadia Maps</li>
+                <li>
+                    If vector tiles fail, it should fallback to raster tiles
+                </li>
+                <li>Check the browser console for loading messages</li>
+                <li>
+                    The style should resemble Stamen Toner (black/white theme)
+                </li>
+            </ul>
+        </div>
+
+        <!-- Leaflet JS -->
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+        <!-- MapLibre GL JS -->
+        <script src="https://unpkg.com/maplibre-gl@4.0.2/dist/maplibre-gl.js"></script>
+
+        <!-- MapLibre GL Leaflet Plugin -->
+        <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet@0.0.20/leaflet-maplibre-gl.js"></script>
+
+        <script>
+            const statusDiv = document.getElementById("status");
+
+            function updateStatus(message, type = "info") {
+                statusDiv.textContent = message;
+                statusDiv.className = `info ${type}`;
+            }
+
+            function initMap() {
+                // Create map centered on Lisbon
+                const map = L.map("map").setView([38.7169, -9.1399], 12);
+
+                try {
+                    console.log("Attempting to load vector tiles...");
+                    updateStatus("Loading vector tiles...", "info");
+
+                    const maplibreLayer = L.maplibreGL({
+                        style: "https://tiles.stadiamaps.com/styles/stamen_toner.json",
+                        attribution:
+                            "© Stadia Maps © Stamen Design © OpenStreetMap contributors",
+                    });
+
+                    // Add success/error handlers
+                    maplibreLayer.on("add", () => {
+                        console.log("Vector tiles loaded successfully");
+                        updateStatus(
+                            "✅ Vector tiles loaded successfully!",
+                            "success",
+                        );
+                    });
+
+                    maplibreLayer.on("error", (e) => {
+                        console.error("Vector tiles failed to load:", e);
+                        updateStatus(
+                            "❌ Vector tiles failed, falling back to raster tiles...",
+                            "error",
+                        );
+                        addFallbackRasterTiles(map);
+                    });
+
+                    maplibreLayer.addTo(map);
+                } catch (error) {
+                    console.error("Failed to initialize vector tiles:", error);
+                    updateStatus(
+                        "❌ Vector tiles initialization failed, using raster fallback",
+                        "error",
+                    );
+                    addFallbackRasterTiles(map);
+                }
+            }
+
+            function addFallbackRasterTiles(map) {
+                console.log("Adding fallback raster tiles...");
+
+                const rasterLayer = L.tileLayer(
+                    "https://tiles.stadiamaps.com/tiles/stamen_toner/{z}/{x}/{y}.png",
+                    {
+                        attribution:
+                            "© Stadia Maps © Stamen Design © OpenStreetMap contributors",
+                        maxZoom: 18,
+                    },
+                );
+
+                rasterLayer.addTo(map);
+                updateStatus("🔄 Fallback raster tiles loaded", "info");
+                console.log("Fallback raster tiles added successfully");
+            }
+
+            // Initialize map when page loads
+            document.addEventListener("DOMContentLoaded", initMap);
+        </script>
+    </body>
+</html>

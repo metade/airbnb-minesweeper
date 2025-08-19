@@ -15,17 +15,23 @@ class GameMap {
       // Calculate map bounds from data
       const bounds = this.calculateBounds();
 
-      // Create map with fixed view
+      // Create map with limited zoom capability and bounded panning
       this.map = L.map("map", {
-        zoomControl: false,
-        dragging: false,
-        touchZoom: false,
-        scrollWheelZoom: false,
-        doubleClickZoom: false,
+        zoomControl: true,
+        dragging: true,
+        touchZoom: true,
+        scrollWheelZoom: true,
+        doubleClickZoom: true,
         boxZoom: false,
         keyboard: false,
         tap: false,
+        minZoom: 12,
+        maxZoom: 14,
       });
+
+      // Set maximum bounds to limit panning to the game area
+      const paddedBounds = this.calculatePaddedBounds(bounds);
+      this.map.setMaxBounds(paddedBounds);
 
       // Add Stamen Toner tile layer (background map)
       L.tileLayer(
@@ -38,7 +44,9 @@ class GameMap {
       ).addTo(this.map);
 
       // Fit map to data bounds with tighter padding for mobile
-      this.map.fitBounds(bounds, { padding: [1, 1] });
+      // Set initial zoom to allow for one level up/down
+      const initialZoom = 13; // Middle zoom level
+      this.map.fitBounds(bounds, { padding: [1, 1], maxZoom: initialZoom });
 
       // Create game cells from GeoJSON
       this.createGameCells();
@@ -113,6 +121,18 @@ class GameMap {
     return [
       [minLat, minLng],
       [maxLat, maxLng],
+    ];
+  }
+
+  calculatePaddedBounds(bounds) {
+    // Add padding to the bounds to allow some panning beyond the immediate game area
+    const [[minLat, minLng], [maxLat, maxLng]] = bounds;
+    const latPadding = (maxLat - minLat) * 0.1; // 10% padding
+    const lngPadding = (maxLng - minLng) * 0.1; // 10% padding
+
+    return [
+      [minLat - latPadding, minLng - lngPadding],
+      [maxLat + latPadding, maxLng + lngPadding],
     ];
   }
 
